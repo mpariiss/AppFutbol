@@ -11,12 +11,19 @@ import com.example.appfutbol.R
 import com.example.appfutbol.db.DBHelper
 import com.example.appfutbol.model.Match
 
-class MatchAdapter(private val matches: List<Match>, private val context: Context) :
-    RecyclerView.Adapter<MatchAdapter.MatchViewHolder>() {
+class MatchAdapter(
+    private val matches: List<Match>,  // mutable para eliminar items en favoritos
+    private val context: Context,
+    private val onFavoriteChanged: ((Match, Boolean) -> Unit)? = null // Callback para cambios
+) : RecyclerView.Adapter<MatchAdapter.MatchViewHolder>() {
 
-    class MatchViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    private val dbHelper = DBHelper(context)
+    private val favoriteMatches = dbHelper.getFavorites().map { it.id }.toMutableSet()
+
+    inner class MatchViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvTeams: TextView = view.findViewById(R.id.tv_teams)
         val tvDate: TextView = view.findViewById(R.id.tv_date)
+        val ivFavorite: ImageView = view.findViewById(R.id.iv_favorite)  // Añadido para el icono
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MatchViewHolder {
@@ -30,12 +37,34 @@ class MatchAdapter(private val matches: List<Match>, private val context: Contex
         holder.tvTeams.text = "${match.homeTeam.name} vs ${match.awayTeam.name}"
         holder.tvDate.text = match.utcDate
 
-        holder.itemView.setOnClickListener {
-            // Agregar el partido a favoritos cuando se haga clic
-            DBHelper(context).addFavorite(match)
-            Toast.makeText(context, "Agregado a favoritos", Toast.LENGTH_SHORT).show()
+        val isFavorite = favoriteMatches.contains(match.id)
+
+        // Mostrar icono según favorito o no
+        holder.ivFavorite.setImageResource(
+            if (isFavorite) R.drawable.ic_favorite_check else R.drawable.ic_favorite
+        )
+
+        // SOLO el icono corazón controla favorito
+        holder.ivFavorite.setOnClickListener {
+            if (isFavorite) {
+                dbHelper.removeFavorite(match.id)
+                favoriteMatches.remove(match.id)
+                holder.ivFavorite.setImageResource(R.drawable.ic_favorite)
+                Toast.makeText(context, "Eliminado de favoritos", Toast.LENGTH_SHORT).show()
+                onFavoriteChanged?.invoke(match, false)  // Notificamos que lo quitaron
+            } else {
+                dbHelper.addFavorite(match)
+                favoriteMatches.add(match.id)
+                holder.ivFavorite.setImageResource(R.drawable.ic_favorite_check)
+                Toast.makeText(context, "Agregado a favoritos", Toast.LENGTH_SHORT).show()
+                onFavoriteChanged?.invoke(match, true)   // Notificamos que lo agregaron
+            }
         }
+
+        // Quitamos click del item completo (opcional)
+        holder.itemView.setOnClickListener(null)
     }
 
     override fun getItemCount() = matches.size
 }
+

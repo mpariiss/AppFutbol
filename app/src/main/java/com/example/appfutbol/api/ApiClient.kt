@@ -9,6 +9,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 object ApiClient {
     private const val BASE_URL = "https://api.football-data.org/v4/"
 
+
     fun create(): FootballApiService {
         val interceptor = HttpLoggingInterceptor()
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY)

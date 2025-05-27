@@ -12,6 +12,7 @@ import com.example.appfutbol.model.Match
 class FavoritesActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private val favoriteList = mutableListOf<Match>()
+    private lateinit var adapter: MatchAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,9 +23,17 @@ class FavoritesActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recycler_matches)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // Obtener los partidos guardados como favoritos
         val db = DBHelper(this)
-        favoriteList.addAll(db.getFavorites())  // Recuperamos los partidos favoritos de la base de datos SQLite
-        recyclerView.adapter = MatchAdapter(favoriteList, this)
+        favoriteList.addAll(db.getFavorites())
+
+        adapter = MatchAdapter(favoriteList, this) { match, isFavorite ->
+            if (!isFavorite) {
+                // Cuando quitas favorito, eliminar partido de la lista y refrescar
+                favoriteList.remove(match)
+                adapter.notifyDataSetChanged()
+            }
+        }
+
+        recyclerView.adapter = adapter
     }
 }

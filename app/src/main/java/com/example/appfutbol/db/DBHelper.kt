@@ -60,4 +60,10 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "FootballDB", null,
         cursor.close()
         return list
     }
+
+    fun removeFavorite(matchId: Int) {
+        val db = writableDatabase
+        db.delete("favorites", "id = ?", arrayOf(matchId.toString()))
+    }
+
 }
