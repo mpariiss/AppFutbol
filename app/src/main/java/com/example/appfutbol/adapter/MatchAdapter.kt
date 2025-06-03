@@ -12,9 +12,9 @@ import com.example.appfutbol.db.DBHelper
 import com.example.appfutbol.model.Match
 
 class MatchAdapter(
-    private val matches: List<Match>,  // mutable para eliminar items en favoritos
+    private val matches: List<Match>,
     private val context: Context,
-    private val onFavoriteChanged: ((Match, Boolean) -> Unit)? = null // Callback para cambios
+    private val onFavoriteChanged: ((Match, Boolean) -> Unit)? = null
 ) : RecyclerView.Adapter<MatchAdapter.MatchViewHolder>() {
 
     private val dbHelper = DBHelper(context)
@@ -39,12 +39,12 @@ class MatchAdapter(
 
         val isFavorite = favoriteMatches.contains(match.id)
 
-        // Mostrar icono según favorito o no
+
         holder.ivFavorite.setImageResource(
             if (isFavorite) R.drawable.ic_favorite_check else R.drawable.ic_favorite
         )
 
-        // SOLO el icono corazón controla favorito
+
         holder.ivFavorite.setOnClickListener {
             if (isFavorite) {
                 dbHelper.removeFavorite(match.id)

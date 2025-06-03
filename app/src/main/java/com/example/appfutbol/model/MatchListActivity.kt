@@ -31,8 +31,8 @@ class MatchListActivity : AppCompatActivity() {
     private fun loadMatchesFromApi() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                // Llamada al endpoint: /matches?status=SCHEDULED
-                val response = ApiClient.create().getMatches()
+
+                  val response = ApiClient.create().getMatches()
 
                 if (response.isSuccessful) {
                     val matches = response.body()?.matches ?: emptyList()

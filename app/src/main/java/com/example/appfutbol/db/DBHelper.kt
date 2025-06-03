@@ -28,7 +28,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, "FootballDB", null,
         onCreate(db)
     }
 
-    // Agregar un partido como favorito
+    //
     fun addFavorite(match: Match) {
         val db = writableDatabase
         val contentValues = ContentValues().apply {
